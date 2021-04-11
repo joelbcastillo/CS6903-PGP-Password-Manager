@@ -14,9 +14,8 @@ This project is a web-based password manager that utilizes PGP to encrypt passwo
 Requirements
 ------------
 
-- Keyserver
-  - Organizations deploying this solution will need to have a trusted keyserver to verify user public keys for encryption.
-    - Default keyserver is <https://keys.openpgp.org>
+* Keyserver - Organizations deploying this solution will need to have a trusted keyserver to verify user public keys for encryption.
+  * Default keyserver is <https://keys.openpgp.org>
 
 ### Threat Model
 
@@ -45,6 +44,12 @@ Design
 ![Decryption Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Decryption.png)
 ![Encryption Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Encryption.png)
 ![Modify Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Modify.png)
+
+Comparison between PGP Encryption and Symmetric Encryption for Password Managers
+---------------------------------------------------------------
+
+Symmetric 
+
 
 Authors
 -------
