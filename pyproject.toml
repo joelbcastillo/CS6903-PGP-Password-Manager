@@ -1,14 +1,14 @@
 
 [tool.poetry]
-name = "CS6903-Vaccine-Passport-Checker"
+name = "CS6903-PGP-Password-Manager"
 version = "0.1.0"
 description = "A secure system for checking in users to small businesses and events (such as libraries or restaurants) to allow businesses to keep track of COVID-19 exposures."
 authors = ["Joel Castillo <joel.castillo@nyu.edu>", "Gary Zhou <gz438@nyu.edu>", "Ho Yin Kenneth Chan <hyc449@nyu.edu"]
 
 readme = "README.md"
-homepage = "https://github.com/joelbcastillo/CS6903-Vaccine-Passport-Checker"
-repository = "https://github.com/joelbcastillo/CS6903-Vaccine-Passport-Checker"
-documentation = "https://github.com/joelbcastillo/CS6903-Vaccine-Passport-Checker/docs"
+homepage = "https://github.com/joelbcastillo/CS6903-PGP-Password-Manager"
+repository = "https://github.com/joelbcastillo/CS6903-PGP-Password-Manager"
+documentation = "https://github.com/joelbcastillo/CS6903-PGP-Password-Manager/docs"
 keywords = ["castillo_chan_zhou_decrypt_binary"]
 classifiers=[
     "Development Status :: 2 - Pre-Alpha",
@@ -25,10 +25,10 @@ classifiers=[
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/joelbcastillo/CS6903-Vaccine-Passport-Checker/issues"
+"Bug Tracker" = "https://github.com/joelbcastillo/CS6903-PGP-Password-Manager/issues"
 
 [tool.poetry.scripts]
-CS6903-Vaccine-Passport-Checker = 'CS6903-Vaccine-Passport-Checker.cli:cli'
+CS6903-PGP-Password-Manager = 'CS6903-PGP-Password-Manager.cli:cli'
 
 [tool.poetry.dependencies]
 python = "<3.10,>=3.6.1"
@@ -66,7 +66,7 @@ source = ["src", "*/site-packages"]
 
 [tool.coverage.run]
 branch = true
-source = ["CS6903-Vaccine-Passport-Checker"]
+source = ["CS6903-PGP-Password-Manager"]
 
 [tool.coverage.report]
 fail_under = 50
