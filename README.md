@@ -48,8 +48,9 @@ Design
 Comparison between PGP Encryption and Symmetric Encryption for Password Managers
 ---------------------------------------------------------------
 
-Symmetric 
+Symmetric encryption relies on using a single secret to perform both encryption and decryption. When using a team-based password manager, this requires everyone on the team to have knowledge of this secret in order to access team secrets. Sharing passwords makes it much easier to suffer a breach (if anyone happens to misplace the password). It also prevents the team from implementing access controls to limit access to secrets.
 
+Using asymmetric (gpg) based encryption allows each user to manage their own private key used for decrypting secrets, while allowing everyone else to use their public key to decrypt secrets. This allows teams to implement access controls by choosing whose public keys are used to encrypt the secrets. Also, since each user uses their own key pair to access secrets, the risk of giving access to the entire secrets repository is much reduced. Finally, asymmetric encryption allows us to easily revoke a users access to a given secret by re-encrypting it without that users key. Note that the secret will need to be changed, as if the user has access to a previous version, they could still decrypt the ciphertext.
 
 Authors
 -------
