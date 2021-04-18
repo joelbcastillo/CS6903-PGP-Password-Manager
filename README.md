@@ -42,14 +42,10 @@ Design
 ------
 
 ![Decryption Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Decryption.png)
+
 ![Encryption Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Encryption.png)
+
 ![Modify Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Modify.png)
-
-Comparison between PGP Encryption and Symmetric Encryption for Password Managers
----------------------------------------------------------------
-
-Symmetric 
-
 
 Authors
 -------
