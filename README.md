@@ -47,6 +47,121 @@ Design
 
 ![Modify Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Modify.png)
 
+Schema
+------
+
+### Audit Table
+
+* id - uuid
+* timestamp - datetime
+* user_id - string
+* action_performed - enum
+  * Encrypted Secret
+  * Decrypted Secret
+  * Deleted Secret
+* Inputs (JSON)
+
+### Secrets Table
+
+* id - uuid
+* name - string
+* encrypted_value - binary
+
+### Users Table
+
+* id - uuid
+* key_id - string
+* email - string
+
+### UsersSecrets Table
+
+* id - uuid
+* key_id - string (FK to Users table)
+* secret_id - string (FK to secrets table)
+
+API
+---
+
+### `GET /secret`
+
+Args:
+
+* Key ID
+
+Returns:
+
+```javascript
+[
+  {
+    "id": "SECRET_ID",
+    "name": "SECRET_NAME",
+    "value": "SECRET_VALUE"
+  },
+]
+```
+
+### `POST /secret`
+
+Args:
+
+* Name
+* Encryption Key IDs
+* Encrypted Value
+
+Returns:
+
+```javascript
+{
+  "id": "SECRET_ID",
+}
+```
+
+### `PUT /secret/<SECRET_ID>`
+
+Args:
+
+* Name
+* Encryption Key IDs
+* Encrypted Value
+
+Returns:
+
+```javascript
+{
+  "id": "SECRET_ID",
+}
+```
+
+### `DELETE /secret/<SECRET_ID>`
+
+Args:
+
+Returns:
+
+```javascript
+{
+  "success": "True"
+}
+```
+
+Front-End
+---------
+
+Functions:
+
+* `load_key(File)`
+* `setupKeyManager()`
+* `encrypt(key_ids[], secret)`
+* `decrypt(privateKey, ciphertext)`
+* `modify(secret_id, key_ids[], secret)`
+* `delete(secret_id, privateKey)`
+
+Routes
+------
+
+* Login
+* Home
+
 Authors
 -------
 
