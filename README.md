@@ -42,11 +42,65 @@ Design
 ------
 
 ![Decryption Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Decryption.png)
+
 ![Encryption Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Encryption.png)
+
 ![Modify Workflow](./documentation/CS6903-PGP-Password-Manager-Workflow-Modify.png)
 
-Comparison between PGP Encryption and Symmetric Encryption for Password Managers
----------------------------------------------------------------
+Schema
+------
+
+### Audit Table
+
+* id - uuid
+* timestamp - datetime
+* user_id - string
+* action_performed - enum
+  * Encrypted Secret
+  * Decrypted Secret
+  * Deleted Secret
+* Inputs (JSON)
+
+### Secrets Table
+
+* id - uuid
+* name - string
+* encrypted_value - binary
+
+### Users Table
+
+* id - uuid
+* key_id - string
+* email - string
+
+### UsersSecrets Table
+
+* id - uuid
+* key_id - string (FK to Users table)
+* secret_id - string (FK to secrets table)
+
+API
+---
+
+### `GET /secret`
+
+Args:
+
+* Key ID
+
+Returns:
+
+```javascript
+[
+  {
+    "id": "SECRET_ID",
+    "name": "SECRET_NAME",
+    "value": "SECRET_VALUE"
+  },
+]
+```
+
+### `POST /secret`
 
 Symmetric encryption relies on using a single secret to perform both encryption and decryption. When using a team-based password manager, this requires everyone on the team to have knowledge of this secret in order to access team secrets. Sharing passwords makes it much easier to suffer a breach (if anyone happens to misplace the password). It also prevents the team from implementing access controls to limit access to secrets.
 
