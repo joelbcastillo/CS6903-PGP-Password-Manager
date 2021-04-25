@@ -22,6 +22,9 @@ Requirements
 * Private Keys Stored in Browser
   * Threat: Users will be uploading their private key into the sessionstorage for the domain. If the key is not cleared out from sessionstorage after the user logs out (or a specified timeout period) an attacker could access the key and decrypt all of the secrets a user has access to.
   * Mitigation: When a user logs out or their session times out, the PGP Private Key will be deleted from local browser sessionstorage as designed.
+* Eavesdropping
+  * Threat: It is possible for an attacker / 3rd party to perform a man in the middle attack and capture the traffic from the users browser to the backend server. This traffic, when decrypted, could contain secrets that are being sent to be stored in the backend.
+  * Mitigation: By encrypting the secrets using PGP on the user's browser, we are able to prevent an attacker from obtaining secrets by performing a man in the middle attack. Instead, the attacker would only see a PGP encrypted string when decrypting TLS traffic.
 * Public Key Revocation
   * Threat: Users who are no longer supposed to access data in the secret store will be able to access the secrets as long as the secret is encrypted with their public key.
   * Mitigation:
