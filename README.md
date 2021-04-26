@@ -42,6 +42,24 @@ Requirements
 * Key Hijacking
   * Threat: It is possible to create a key for a user to spoof their access.
   * Mitigation: N/A - Out of scope for this application. Users should only encrypt secrets for other user's whose identities they have verified through another means.
+* Data Tampering
+  * Threat: An attacker could intercept the data and tamper with the message in transit.
+  * Mitigation: An HMAC will be submitted with the data to ensure data integrity.
+
+### Topic Related Notes
+
+Data Origination Spoofing
+
+* We require a users private key for authentication to the web interface. Unless an attacker has control of an authorized users private key, they will not be able to spoof data insertions. 
+
+Data Replay
+
+* Data will be transmitted with an HMAC and a timestamp to ensure validity of each API call. The timestamp inside the submitted data package will be checked agains the received timestamp to determine if the message is valid. There will be a grace period of X seconds (where X is most likely < 1 second).
+
+Chosen Plaintext Attacks
+
+* The output of the GPG encryption algorithm is non-deterministic. As a result, a user would not be able to determine information about the plaintext from the ciphertext
+
 
 Design
 ------
