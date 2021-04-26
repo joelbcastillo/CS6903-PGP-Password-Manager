@@ -11,6 +11,8 @@ Description
 
 This project is a web-based password manager that utilizes PGP to encrypt passwords and share them among authorized users. The application uses a frontend component (kbpgp.js) to allow users to upload their private key into the browser storage only and perform client-side operations for decrypting secrets. Allow users to upload their public key to perform client-side operations for encrypting secrets.
 
+This application is similar to existing application such as 1Password, Bitwarden, and LastPass. All of these applications provide a web interface for users to manage their secrets and share them with team members. However, all accounts for these password managers are protected using a password instead of a public-private key pair that is kept under the end users control. It is most similar to the unix `pass` application, which uses GPG and a command-line interface to store and retrieve secrets.
+
 Requirements
 ------------
 
@@ -23,7 +25,7 @@ Requirements
   * Threat: Users will be uploading their private key into the sessionstorage for the domain. If the key is not cleared out from sessionstorage after the user logs out (or a specified timeout period) an attacker could access the key and decrypt all of the secrets a user has access to.
   * Mitigation: When a user logs out or their session times out, the PGP Private Key will be deleted from local browser sessionstorage as designed.
 * Eavesdropping
-  * Threat: It is possible for an attacker / 3rd party to perform a man in the middle attack and capture the traffic from the users browser to the backend server. This traffic, when decrypted, could contain secrets that are being sent to be stored in the backend.
+  * Threat: It is possible for an attacker / 3rd party to perform a man in the middle attack and capture the traffic from the users browser to the backend server. This traffic, when decrypted, could contain plaintext secrets and metadata that are being sent to be stored in the backend.
   * Mitigation: By encrypting the secrets using PGP on the user's browser, we are able to prevent an attacker from obtaining secrets by performing a man in the middle attack. Instead, the attacker would only see a PGP encrypted string when decrypting TLS traffic.
 * Public Key Revocation
   * Threat: Users who are no longer supposed to access data in the secret store will be able to access the secrets as long as the secret is encrypted with their public key.
