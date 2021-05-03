@@ -33,6 +33,11 @@ CS6903-PGP-Password-Manager = 'CS6903-PGP-Password-Manager.cli:cli'
 [tool.poetry.dependencies]
 python = "<3.10,>=3.6.1"
 Flask = "^1.1.2"
+Flask-SQLAlchemy = "^2.5.1"
+Flask-RESTful = "^0.3.8"
+Flask-Migrate = "^2.7.0"
+python-dotenv = "^0.17.1"
+python-gnupg = "^0.4.7"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.9.3"
