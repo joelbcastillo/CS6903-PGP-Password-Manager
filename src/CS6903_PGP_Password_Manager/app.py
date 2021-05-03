@@ -1,17 +1,22 @@
 import gnupg
+import json
 import os
 from . import constants
 from flask import render_template, request, Flask, Response
 from flask_restful import Api, Resource
 from flask_migrate import Migrate
 from .models import db, Audit, Secrets, Users, UsersSecrets
+from .pgp import encrypt, decrypt
 
 app = Flask(__name__)
 db.init_app(app)
 api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 migrate = Migrate(app, db)
+key_server = os.getenv("KEY_SERVER", "https://keys.openpgp.org/")
+passphrase = os.getenv("PGP_PASSWORD")
 gpg = gnupg.GPG()
+
 with open(os.getenv("PGP_PRIVATE_KEY"), "r") as key_file:
     gpg.import_keys(key_data=key_file.read())
 
@@ -23,10 +28,6 @@ class Home(Resource):
 
 class Secret(Resource):
     def get(self):
-        from .pgp import encrypt, decrypt
-        ec = encrypt(gpg, "test".encode("utf-8"), "", "https://keys.openpgp.org/")
-        print(decrypt(gpg, ec.data))
-
         args = request.args
         key_id = args.get("key_id", None)
         secrets = []
@@ -37,6 +38,7 @@ class Secret(Resource):
             secrets = Secrets.query.filter(Secrets.id.in_(user_secrets)).all()
 
         secrets_list = [secret.as_json for secret in secrets]
+        secrets_list_encrypted = encrypt(gpg, str(secrets_list), key_id, key_server, passphrase)
         user_id = Users.query.filter_by(key_id=key_id).first().id
         audit = Audit(user_id=user_id,
                       action_performed=constants.DECRYPTED_SECRET,
@@ -44,27 +46,30 @@ class Secret(Resource):
         db.session.add(audit)
         db.session.commit()
 
-        return secrets_list
+        return {"secrets": secrets_list_encrypted.data.decode("utf-8")}
 
     def post(self):
-        data = request.get_json(force=True)
-        key_id = data["key_id"]
+        value = request.files['file'].read()
 
-        secret = Secrets(data["name"], key_id, data["value"])
+        decrypted_data = decrypt(gpg, value, passphrase)
+        data_json = json.loads(decrypted_data.data.decode("utf-8"))
+        key_id = data_json["key_id"]
+        secret = Secrets(name=data_json["name"], encrypted_value=value)
         user_id = Users.query.filter_by(key_id=key_id).first().id
         audit = Audit(user_id=user_id,
                       action_performed=constants.ENCRYPTED_SECRET,
-                      inputs=data)
+                      inputs={"encrypted_value": str(value)})
 
         db.session.add(audit)
         db.session.add(secret)
         db.session.commit()
 
-        return {"id": secret.id}
+        return {"id": str(secret.id)}
 
     def put(self, secret_id):
         data = request.get_json(force=True)
 
+        # TODO: decrypt file
         secret = Secrets.query.filter_by(id=secret_id).first()
         secret.name = data["name"]
         secret.encrypted_value = data["value"]
@@ -83,12 +88,15 @@ class Secret(Resource):
 
     def delete(self, key_id):
         secret = Secrets.query.filter_by(id=key_id).first()
-        audit = Audit(user_id="",
+        user_id = Users.query.filter_by(key_id=key_id).first().id
+        audit = Audit(user_id=user_id,
                       action_performed=constants.DELETED_SECRET,
-                      inputs={})
+                      inputs={"secret": secret})
+
         db.session.delete(secret)
         db.session.add(audit)
         db.session.commit()
+
         return {"success": "True"}, 204
 
 

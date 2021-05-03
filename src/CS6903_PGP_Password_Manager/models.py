@@ -46,7 +46,7 @@ class GUID(TypeDecorator):
 class Audit(db.Model):
     id = db.Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
     timestamp = db.Column(db.DateTime, default=datetime.now(), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(GUID, db.ForeignKey("users.id"), nullable=False)
     action_performed = db.Column(db.Enum(
         constants.ENCRYPTED_SECRET,
         constants.DECRYPTED_SECRET,
@@ -68,9 +68,9 @@ class Secrets(db.Model):
     @property
     def as_json(self):
         return {
-            "id": self.id,
+            "id": str(self.id),
             "name": self.name,
-            "value": self.encrypted_value,
+            "value": str(self.encrypted_value),
         }
 
     def __repr__(self):
