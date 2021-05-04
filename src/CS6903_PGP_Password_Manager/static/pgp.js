@@ -20,7 +20,7 @@ class PgpKey {
     }
 
     encrypt(text, onDone) {
-        kbpgp.box({msg: text, encrypt_for: this._key}, (_, cipher) =>
+        kbpgp.box({ msg: text, encrypt_for: this._key }, (_, cipher) =>
             onDone(cipher));
     }
 
@@ -29,20 +29,35 @@ class PgpKey {
     }
 
     decrypt(cipher, onDone) {
-        kbpgp.unbox({keyfetch: this._ring, armored: cipher, progress_hook: null}, (_, literals) =>
+        kbpgp.unbox({ keyfetch: this._ring, armored: cipher, progress_hook: null }, (_, literals) =>
             onDone(literals[0].toString()));
     }
 
     static generate(nickname, onDone) {
-        let opt = {userid: nickname, primary: {nbits: 1024}, subkeys: []};
+        let opt = { userid: nickname, primary: { nbits: 1024 }, subkeys: [] };
         kbpgp.KeyManager.generate(opt, (_, key) =>
             key.sign({}, () =>
                 key.export_pgp_public({}, () =>
                     onDone(new PgpKey(key)))));
     }
 
-    static load(publicKey, onDone) {
-        kbpgp.KeyManager.import_from_armored_pgp({armored: publicKey}, (_, key) =>
-            onDone(new PgpKey(key)));
+    static load(publicKey, password, onDone) {
+        kbpgp.KeyManager.import_from_armored_pgp({ armored: publicKey }, function (err, key) {
+            if (!err) {
+                if (key.is_pgp_locked()) {
+                    key.unlock_pgp({
+                        passphrase: password
+                    }, function (err) {
+                        if (!err) {
+                            onDone(new PgpKey(key));
+                        } else {
+                            onDone(null);
+                        }
+                    })
+                } else {
+                    onDone(new PgpKey(key));
+                }
+            }
+        });
     }
 }

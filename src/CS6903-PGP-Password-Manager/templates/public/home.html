@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="jumbotron"></div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div id="load-key-status-area" class="alert" style="display: none;">
+        <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
+        <p id="load-key-status"></p>
+      </div>
+      <!-- end .alert -->
+    </div>
+    <!-- end col-md -->
+  </div>
+  <!-- end row -->
+  <div class="row">
+    <div class="col-md-8 offset-md-2 text-center border border-dark" id="import-key-area">
+      <form id="load-key">
+        <h1>Import your Private Key (stays in the browser</h1>
+        <p>Select your private key using the Browse button below.</p>
+        <input type="file" id="private-key" />
+        <br /><br />
+        <label for="private-key-password">Private Key Password: </label>
+        <input type="password" id="private-key-password" />
+      </form>
+    </div>
+  </div>
+  <div class="row">
+    <span>&nbsp;</span>
+  </div>
+  <div class="row">
+    <div class="col-md-8 offset-md-2 text-center">
+      <button type="button" class="btn btn-block btn-primary" id="load-key">Load Key</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8 offset-md-2 text-center">
+      <button type="button" class="btn btn-block btn-primary" id="get-secrets" disabled>Get Secrets</button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
