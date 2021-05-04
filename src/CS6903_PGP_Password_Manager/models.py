@@ -50,7 +50,6 @@ class Audit(db.Model):
     action_performed = db.Column(db.Enum(
         constants.ENCRYPTED_SECRET,
         constants.DECRYPTED_SECRET,
-        constants.DELETED_SECRET,
         constants.MODIFIED_SECRET,
     ), nullable=False)
     inputs = db.Column(JSON)
@@ -63,7 +62,6 @@ class Secrets(db.Model):
     id = db.Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(80), nullable=False)
     encrypted_value = db.Column(db.BLOB, nullable=False)
-    # user = db.relationship("UserSecrets", backref="secret", lazy="dynamic")
 
     @property
     def as_json(self):
@@ -80,7 +78,6 @@ class Secrets(db.Model):
 class Users(db.Model):
     id = db.Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
     key_id = db.Column(db.String(80), unique=True, nullable=False)
-    # secrets = db.relationship("UserSecrets", backref="user", lazy="dynamic")
 
     def __repr__(self):
         return '<User %r>' % self.id

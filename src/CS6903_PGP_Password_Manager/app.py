@@ -67,37 +67,25 @@ class Secret(Resource):
         return {"id": str(secret.id)}
 
     def put(self, secret_id):
-        data = request.get_json(force=True)
+        value = request.files['file'].read()
 
-        # TODO: decrypt file
+        decrypted_data = decrypt(gpg, value, passphrase)
+        data_json = json.loads(decrypted_data.data.decode("utf-8"))
+
         secret = Secrets.query.filter_by(id=secret_id).first()
-        secret.name = data["name"]
-        secret.encrypted_value = data["value"]
+        secret.name = data_json["secret_info"]["name"]
+        secret.encrypted_value = data_json["secret_info"]["encrypted_value"]
 
-        key_id = UsersSecrets.query.filter_by(secret_id=secret.id).first().key_id
-        user_id = Users.query.filter_by(key_id=key_id).first().id
+        user_id = Users.query.filter_by(key_id=data_json["key_id"]).first().id
         audit = Audit(user_id=user_id,
                       action_performed=constants.MODIFIED_SECRET,
-                      inputs=data)
+                      inputs={"secret_id": secret.id, "encrypted_value": secret.encrypted_value})
 
         db.session.add(audit)
         db.session.add(secret)
         db.session.commit()
 
-        return {"id": secret_id}, 201
-
-    def delete(self, key_id):
-        secret = Secrets.query.filter_by(id=key_id).first()
-        user_id = Users.query.filter_by(key_id=key_id).first().id
-        audit = Audit(user_id=user_id,
-                      action_performed=constants.DELETED_SECRET,
-                      inputs={"secret": secret})
-
-        db.session.delete(secret)
-        db.session.add(audit)
-        db.session.commit()
-
-        return {"success": "True"}, 204
+        return {"id": str(secret.id)}, 201
 
 
 api.add_resource(Home, "/home")
