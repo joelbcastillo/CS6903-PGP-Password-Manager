@@ -17,16 +17,18 @@ $(document).ready(function () {
     async function loadKey() {
         $('#load-key-status-area').hide();
         let privateKeyFile = readKey($('#private-key')[0].files[0]);
-        let password = $('#private-key-password').value;
+        let password = $('#private-key-password').val();
+        console.log(password);
         privateKey = await privateKeyFile;
         PgpKey.load(privateKey, password, key => {
             keyManager = key;
         });
         if (keyManager) {
             $('#load-key-status-area').show();
-            $('#load-key-status-area').removeClass().addClass('alert alert-success');
+            $('#l1oad-key-status-area').removeClass().addClass('alert alert-success');
             $('#load-key-status').html("<span>Successfully loaded key.</span>");
-            // $('#load-key').click(loadKey);
+            $('#load-key').click(loadKey);
+            $('#get-secrets').prop('disabled', false);
         } else {
             $('#load-key-status-area').show();
             $('#load-key-status-area').removeClass().addClass('alert alert-danger');
@@ -35,22 +37,27 @@ $(document).ready(function () {
         }
     }
 
-    function getSecrets(key) {
-        keyId = key.id();
-        secrets = [];
-        $.ajax({
-            url: "/secrets/" + keyId,
+    function getSecrets() {
+        keyId = keyManager.id();
+        $.get({
+            url: "/secret",
+            data: {
+                "key_id": keyId,
+            },
             success: function (data) {
-                $.each(data, function (ndx, val) {
-                    key.decrypt(val, plain => { secrets[ndx] = plain });
-                });
+                console.log(data['secrets']);
+                keyManager.decrypt(data['secrets'], secrets => {
+                    console.log(typeof(secrets))
+                    jsonSecrets = JSON.parse(secrets);
+                    $.each(jsonSecrets, function (i, item) {
+                        console.log(item);
+                    })
+                }
+                );
             }
         });
     }
 
-    
-
-
-
     $('#load-key').click(loadKey);
+    $('#get-secrets').click(getSecrets);
 });

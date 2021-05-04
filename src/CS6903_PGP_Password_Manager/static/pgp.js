@@ -45,12 +45,14 @@ class PgpKey {
         kbpgp.KeyManager.import_from_armored_pgp({ armored: publicKey }, function (err, key) {
             if (!err) {
                 if (key.is_pgp_locked()) {
+                    console.log("LOCKED");
                     key.unlock_pgp({
                         passphrase: password
                     }, function (err) {
                         if (!err) {
                             onDone(new PgpKey(key));
                         } else {
+                            console.log(err);
                             onDone(null);
                         }
                     })
