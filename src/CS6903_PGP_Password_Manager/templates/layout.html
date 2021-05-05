@@ -57,7 +57,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
     crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='pgp.js') }}"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% include "app.js.html" %}
     <script src="{{ url_for('static', filename='lib/kbpgp.js') }}"></script>
   {% endblock %}
   <!-- end scripts -->

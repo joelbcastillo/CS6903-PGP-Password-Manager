@@ -1,0 +1,113 @@
+<script type="text/javascript">
+    $(document).ready(function () {
+        var appPublicKey = "{{ app_public_key }}";
+
+        var privateKey = null;
+        var keyManager = null;
+        var publicKeyManager = null;
+        PgpKey.load(appPublicKey, null, key => {
+            publicKeyManager = key;
+        });
+        function readKey(file, onLoadCallback) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    resolve(
+                        reader.result
+                    );
+                };
+                reader.onerror = reject;
+                reader.readAsText(file);
+            })
+        }
+
+        async function loadKey() {
+            $('#load-key-status-area').hide();
+            $('#l1oad-key-status-area').removeClass();
+            let privateKeyFile = readKey($('#private-key')[0].files[0]);
+            let password = $('#private-key-password').val();
+            privateKey = await privateKeyFile;
+            PgpKey.load(privateKey, password, key => {
+                keyManager = key;
+            });
+            if (keyManager) {
+                $('#load-key-status-area').show();
+                $('#l1oad-key-status-area').removeClass().addClass('alert alert-success');
+                $('#load-key-status').html("<span>Successfully loaded key.</span>");
+                $('#load-key').click(loadKey);
+                $('#get-secrets').prop('disabled', false);
+                $('#create-secret-form').show();
+            } else {
+                $('#load-key-status-area').show();
+                $('#load-key-status-area').removeClass().addClass('alert alert-danger');
+                $('#load-key-status').html("<span>Failed to load key. Please make sure you provided a password (if needed).</span>");
+                $('#load-key').click(loadKey);
+            }
+        }
+
+        function getSecrets() {
+            keyId = keyManager.id();
+            $.get({
+                url: "/secret",
+                data: {
+                    "key_id": keyId,
+                },
+                success: function (data) {
+                    keyManager.decrypt(data['secrets'], secrets => {
+                        jsonSecrets = JSON.parse(secrets);
+                        $('#secrets-div').html('');
+                        $.each(jsonSecrets, function (i, item) {
+                            keyManager.decrypt(item['name'], dec_name => {
+                                var temp_dec_name = dec_name;
+                                keyManager.decrypt(item['value'], dec_value => {
+                                    var temp_dec_value = dec_value;
+                                    $('#secrets-div').append("<tr><td>" + item['id'] + "</td><td>" + temp_dec_name + "</td><td>" + temp_dec_value + "</td><td>" + item['users'] + "</td></tr>");
+                                });
+                            });
+                        });
+                    })
+                }
+            });
+        }
+
+        async function createSecret() {
+            secret_name = $("#new-secret-name").val();
+            secret_ids = $("#new-secret-ids").val();
+            if (secret_ids.length === 0) {
+                secret_ids = keyManager.id();
+            } else {
+                secret_ids = secret_ids + "," + keyManager.id();
+            }
+            secret_value = $("#new-secret-value").val();
+            data = {}
+            var encrypted_secret_name = null;
+            encrypted_secret_name = keyManager.encrypt(secret_name, secret_name_enc => {
+                var encrypted_secret_name = secret_name_enc;
+                encrypted_secret_value = keyManager.encrypt(secret_value, secret_value_enc => {
+                    var encrypted_secret_value = secret_value_enc;
+                    encrypted_secret_ids = publicKeyManager.encrypt(secret_ids, secret_ids_enc => {
+                        var encrypted_secret_ids = secret_ids_enc;
+                        data['ids'] = encrypted_secret_ids;
+                        data['name'] = encrypted_secret_name;
+                        data['value'] = encrypted_secret_value;
+                        data['key_id'] = keyManager.id();
+
+                        publicKeyManager.encrypt(JSON.stringify(data), publicEnc => {
+                            $.post(
+                                "/secret",
+                                {
+                                    name: publicEnc
+                                }
+                            )
+                        });
+                    });
+                });
+            });
+        }
+
+        $('#load-key').click(loadKey);
+        $('#get-secrets').click(getSecrets);
+        $('#create-secret-btn').click(createSecret);
+
+    });
+</script>

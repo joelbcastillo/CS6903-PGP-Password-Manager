@@ -36,6 +36,36 @@
       <button type="button" class="btn btn-block btn-primary" id="get-secrets" disabled>Get Secrets</button>
     </div>
   </div>
-
+  <div class="row">
+    <div class="col-md-6" id="create-secret-form" style="display: none;">
+      <h3>Create a Secret</h3>
+      <label for="name">name</label>
+      <input type="text" name="name" id="new-secret-name">
+      <br />
+      <label for="ids">ids</label>
+      <input type="text" name="ids" id="new-secret-ids">
+      <br />
+      <label for="value">value</label>
+      <input type="text" name="value" id="new-secret-value">
+      <br />
+      <input type="file" id="new-secret-data" hidden>
+      <button type="button" class="btn btn-block btn-primary" id="create-secret-btn">Create Secret</button>
+    </div>
+  </div>
+  <div class="row">
+    <table id="secrets-table" class="table table-striped">
+      <thead>
+        <tr>
+          <td>ID</td>
+          <td>Name</td>
+          <td>Value</td>
+          <td>Users</td>
+          <td>Edit</td>
+          <td>Delete</td>
+        </tr>
+      </thead>
+      <tbody id="secrets-div"></tbody>
+    <table>    
+  </div>
 </div>
 {% endblock %}

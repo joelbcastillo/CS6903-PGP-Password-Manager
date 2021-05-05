@@ -67,14 +67,14 @@ class Audit(db.Model):
 
 class Secrets(db.Model):
     id = db.Column(GUID, primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.BLOB, nullable=False)
     encrypted_value = db.Column(db.BLOB, nullable=False)
 
     @property
     def as_json(self):
         return {
             "id": str(self.id),
-            "name": self.name,
+            "name": str(self.name.decode("utf-8")),
             "value": str(self.encrypted_value.decode("utf-8")),
         }
 

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 
@@ -17,15 +18,19 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
 migrate = Migrate(app, db)
 key_server = os.getenv("KEY_SERVER", "https://keys.openpgp.org/")
 passphrase = os.getenv("PGP_PASSWORD")
+public_key_id = os.getenv("PGP_KEY_ID")
 gpg = gnupg.GPG()
 
 with open(os.getenv("PGP_PRIVATE_KEY"), "r") as key_file:
-    gpg.import_keys(key_data=key_file.read())
+    test = gpg.import_keys(key_data=key_file.read())
 
 
 class Home(Resource):
     def get(self):
-        return Response(render_template("public/home.html"), mimetype="text/html")
+        public_key = gpg.export_keys(public_key_id).replace("\n", "\\n")
+        return Response(
+            render_template("public/home.html", app_public_key=public_key), mimetype="text/html"
+        )
 
 
 class Secret(Resource):
@@ -33,6 +38,7 @@ class Secret(Resource):
         args = request.args
         key_id = args.get("key_id", None)
         secrets = []
+        users_secrets = {}
 
         if key_id is not None:
             user_secrets = (
@@ -43,26 +49,60 @@ class Secret(Resource):
             user_secrets = [us[0] for us in user_secrets]
             secrets = Secrets.query.filter(Secrets.id.in_(user_secrets)).all()
 
-        secrets_list = json.dumps([secret.as_json for secret in secrets])
-        secrets_list_encrypted = encrypt(gpg, str(secrets_list), key_id, key_server, passphrase)
-        user_id = Users.query.filter_by(key_id=key_id).first().id
-        audit = Audit(
-            user_id=user_id,
-            action_performed=constants.DECRYPTED_SECRET,
-            inputs={"secrets": secrets_list},
-        )
-        db.session.add(audit)
-        db.session.commit()
+            for secret in secrets:
+                users_secrets[str(secret.id)] = [
+                    list(u)
+                    for u in UsersSecrets.query.with_entities(UsersSecrets.key_id)
+                    .filter_by(secret_id=secret.id)
+                    .all()
+                ]
+                users_secrets[str(secret.id)]
 
-        return {"secrets": secrets_list_encrypted.data.decode("utf-8")}
+        secrets_list = [secret.as_json for secret in secrets]
+        for secret in secrets_list:
+            secret["users"] = users_secrets[secret["id"]]
+
+        secrets_list = json.dumps(secrets_list)
+        secrets_list_encrypted = encrypt(gpg, str(secrets_list), key_id, key_server, passphrase)
+        if secrets_list:
+            user_id = Users.query.filter_by(key_id=key_id).first()
+            if user_id:
+                audit = Audit(
+                    user_id=user_id,
+                    action_performed=constants.DECRYPTED_SECRET,
+                    inputs={"secrets": secrets_list},
+                )
+                db.session.add(audit)
+                db.session.commit()
+
+            return {
+                "secrets": secrets_list_encrypted.data.decode("utf-8"),
+                "digest": str(hashlib.sha256(secrets_list_encrypted.data).hexdigest()),
+            }
+        return {}
 
     def post(self):
-        value = request.files["file"].read()
+        value = request.form["name"]
 
         decrypted_data = decrypt(gpg, value, passphrase)
+        print(decrypted_data.data.decode("utf-8"))
         data_json = json.loads(decrypted_data.data.decode("utf-8"))
         key_id = data_json["key_id"]
-        secret = Secrets(name=data_json["name"], encrypted_value=value)
+        secret = Secrets(
+            name=data_json["name"].encode(), encrypted_value=data_json["value"].encode()
+        )
+        db.session.add(secret)
+        db.session.commit()
+        user_ids = decrypt(gpg, data_json["ids"], passphrase)
+        for user in user_ids.data.decode("utf-8").split(","):
+            user_secret = UsersSecrets(key_id=user, secret_id=secret.id)
+            db.session.add(user_secret)
+            db.session.commit()
+
+            if Users.query.filter_by(key_id=key_id).one_or_none() is None:
+                user_obj = Users(key_id=user)
+                db.session.add(user_obj)
+                db.session.commit()
         user_id = Users.query.filter_by(key_id=key_id).first().id
         audit = Audit(
             user_id=user_id,
@@ -71,7 +111,6 @@ class Secret(Resource):
         )
 
         db.session.add(audit)
-        db.session.add(secret)
         db.session.commit()
 
         return {"id": str(secret.id)}
