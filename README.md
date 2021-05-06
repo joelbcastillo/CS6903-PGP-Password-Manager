@@ -19,6 +19,47 @@ Requirements
 * Keyserver - Organizations deploying this solution will need to have a trusted keyserver to verify user public keys for encryption.
   * Default keyserver is <https://keys.openpgp.org>
 
+Installing and Running the Application
+--------------------------------------
+
+To install the application, run this command in your terminal:
+
+```shell
+$ git clone https://github.com/joelbcastillo/CS6903-PGP-Password-Manager.git
+$ cd CS6903-PGP-Password-Manager
+$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip install dist/*.whl
+```
+
+Create your .env file (here is a sample):
+
+```shell
+DEBUG=True
+FLASK_APP=./src/CS6903_PGP_Password_Manager/app.py
+FLASK_ENV=development
+KEY_SERVER=https://keys.openpgp.org/
+PGP_PASSWORD="P@ssword!"
+PGP_PRIVATE_KEY=./keys/john_doe.asc
+PGP_KEY_ID="905E85F88F91EB12"
+SQLALCHEMY_DATABASE_URI="sqlite:///./dev.db"
+
+```
+
+To setup the database:
+
+```shell
+flask db upgrade
+```
+
+To run the application:
+
+```shell
+flask run
+```
+
+The application will be running on localhost port 5000. You can access it by visiting <http://localhost:5000/home>
+
 ### Threat Model
 
 * Private Keys Stored in Browser
