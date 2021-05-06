@@ -19,9 +19,14 @@ class PgpKey {
         return this._key.userids[0].get_username();
     }
 
-    encrypt(text, onDone) {
-        kbpgp.box({ msg: text, encrypt_for: this._key }, (_, cipher) =>
+    encrypt(text, recipientKey, onDone) {
+        if (recipientKey === null) {
+            kbpgp.box({ msg: text, encrypt_for: this._key }, (_, cipher) =>
             onDone(cipher));
+        } else {
+            kbpgp.box({ msg: text, encrypt_for: [this._key, recipientKey._key] }, (_, cipher) =>
+            onDone(cipher));
+        }
     }
 
     canDecrypt() {

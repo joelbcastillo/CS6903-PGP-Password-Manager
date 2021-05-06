@@ -93,8 +93,7 @@ class Secret(Resource):
         )
         db.session.add(secret)
         db.session.commit()
-        user_ids = decrypt(gpg, data_json["ids"], passphrase)
-        for user in user_ids.data.decode("utf-8").split(","):
+        for user in data_json['ids']:
             user_secret = UsersSecrets(key_id=user, secret_id=secret.id)
             db.session.add(user_secret)
             db.session.commit()

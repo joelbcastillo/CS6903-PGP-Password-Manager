@@ -61,7 +61,7 @@
                                 var temp_dec_name = dec_name;
                                 keyManager.decrypt(item['value'], dec_value => {
                                     var temp_dec_value = dec_value;
-                                    $('#secrets-div').append("<tr><td>" + item['id'] + "</td><td>" + temp_dec_name + "</td><td>" + temp_dec_value + "</td><td>" + item['users'] + "</td></tr>");
+                                    $('#secrets-div').append("<tr><td>" + item['id'] + "</td><td>" + temp_dec_name + "</td><td>" + temp_dec_value + "</td><td>" + item['users'] + "</td><td></tr>");
                                 });
                             });
                         });
@@ -72,31 +72,37 @@
 
         async function createSecret() {
             secret_name = $("#new-secret-name").val();
-            secret_ids = $("#new-secret-ids").val();
-            if (secret_ids.length === 0) {
-                secret_ids = keyManager.id();
-            } else {
-                secret_ids = secret_ids + "," + keyManager.id();
-            }
             secret_value = $("#new-secret-value").val();
             data = {}
+
+            let recipientPublicKeyFile = readKey($('#recipient-public-key')[0].files[0]);
+            recipientPublicKey = await recipientPublicKeyFile;
+            PgpKey.load(recipientPublicKey, null, key => {
+                recipientPublicKeyManager = key;
+            });
+            recipientKeyId = recipientPublicKeyManager.id();
+            creatorKeyId = keyManager.id();
+            keyIds = [creatorKeyId, recipientKeyId];
             var encrypted_secret_name = null;
-            encrypted_secret_name = keyManager.encrypt(secret_name, secret_name_enc => {
+            encrypted_secret_name = keyManager.encrypt(secret_name, recipientPublicKeyManager, secret_name_enc => {
                 var encrypted_secret_name = secret_name_enc;
-                encrypted_secret_value = keyManager.encrypt(secret_value, secret_value_enc => {
+                encrypted_secret_value = keyManager.encrypt(secret_value, recipientPublicKeyManager, secret_value_enc => {
                     var encrypted_secret_value = secret_value_enc;
-                    encrypted_secret_ids = publicKeyManager.encrypt(secret_ids, secret_ids_enc => {
+                    encrypted_secret_ids = publicKeyManager.encrypt(keyIds, null, secret_ids_enc => {
                         var encrypted_secret_ids = secret_ids_enc;
-                        data['ids'] = encrypted_secret_ids;
+                        data['ids'] = keyIds;
                         data['name'] = encrypted_secret_name;
                         data['value'] = encrypted_secret_value;
                         data['key_id'] = keyManager.id();
 
-                        publicKeyManager.encrypt(JSON.stringify(data), publicEnc => {
+                        publicKeyManager.encrypt(JSON.stringify(data), null, publicEnc => {
                             $.post(
                                 "/secret",
                                 {
                                     name: publicEnc
+                                },
+                                function (data) {
+                                    alert("Successfully stored secret (" + data["id"] + ")");
                                 }
                             )
                         });
