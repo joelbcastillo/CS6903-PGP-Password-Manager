@@ -14,7 +14,7 @@ from .pgp import decrypt, encrypt
 app = Flask(__name__)
 db.init_app(app)
 api = Api(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///./dev.db")
 migrate = Migrate(app, db)
 key_server = os.getenv("KEY_SERVER", "https://keys.openpgp.org/")
 passphrase = os.getenv("PGP_PASSWORD")

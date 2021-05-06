@@ -13,8 +13,9 @@
             "FLASK_ENV": "development",
             "KEY_SERVER": "https://keys.openpgp.org/",
             "PGP_PASSWORD": "P@ssword!",
-            "PGP_PRIVATE_KEY": "/Users/joel/Dropbox/School/MS-CyberSecurity/CS6903 - Applied Cryptography/Assignments/Project_2/john_doe.asc",
-            "PGP_KEY_ID": "905E85F88F91EB12"
+            "PGP_PRIVATE_KEY": "./keys/john_doe.asc",
+            "PGP_KEY_ID": "905E85F88F91EB12",
+            "SQLALCHEMY_DATABASE_URI": "sqlite:///./dev.db"
         },
         "args": [
             "run",
