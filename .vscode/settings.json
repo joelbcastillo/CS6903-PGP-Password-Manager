@@ -1,3 +1,11 @@
 {
-    "python.pythonPath": ".venv/bin/python"
+    "python.pythonPath": "/Users/joel/Dropbox/School/MS-CyberSecurity/CS6903 - Applied Cryptography/Assignments/Project_2/.venv/bin/python3.9",
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "test",
+            "database": "/private/tmp/test.db"
+        }
+    ]
 }

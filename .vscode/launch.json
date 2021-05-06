@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [{
+        "name": "Python: Flask",
+        "type": "python",
+        "request": "launch",
+        "module": "flask",
+        "env": {
+            "FLASK_APP": "./src/CS6903_PGP_Password_Manager/app.py",
+            "FLASK_ENV": "development",
+            "KEY_SERVER": "https://keys.openpgp.org/",
+            "PGP_PASSWORD": "P@ssword!",
+            "PGP_PRIVATE_KEY": "/Users/joel/Dropbox/School/MS-CyberSecurity/CS6903 - Applied Cryptography/Assignments/Project_2/john_doe.asc",
+            "PGP_KEY_ID": "905E85F88F91EB12"
+        },
+        "args": [
+            "run",
+            "--no-debugger"
+        ],
+        "jinja": true
+    }]
+}
